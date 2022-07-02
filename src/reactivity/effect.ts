@@ -1,14 +1,19 @@
 let activeEffect: ReactiveEffect | null = null
 class ReactiveEffect {
+    deps: (Set<any>)[] = []
     constructor(private _fn: Function, public scheduler?) { }
     run() {
         activeEffect = this;
         return this._fn();
     }
+    stop() {
+        this.deps.forEach((dep: Set<any>) => {
+            dep.delete(this);
+        });
+    }
 }
 
 const targetMap = new Map;
-
 // 依赖收集
 export function track(target, property) {
     // 通过target找到property, 在通过property找到对应的deps
@@ -23,6 +28,9 @@ export function track(target, property) {
     }
     const propertyDeps = propertyDepsMap.get(property);
     propertyDeps.add(activeEffect);
+
+    // 反向收集, 用于在activeEffect中使用deps
+    activeEffect?.deps.push(propertyDeps);
 }
 
 // 触发依赖
@@ -41,9 +49,7 @@ function runReactiveEffect(effect: ReactiveEffect) {
     } else {
         effect.run();
     }
-
 }
-
 
 
 interface EffectOptions {
@@ -53,5 +59,15 @@ interface EffectOptions {
 export function effect(fn, effectOptions?: EffectOptions) {
     const _effect = new ReactiveEffect(fn, effectOptions?.scheduler);
     _effect.run();
-    return _effect.run.bind(_effect);
+    const runner: any = _effect.run.bind(_effect);
+
+    // Note: 挂在runner上的effect方法是为了让effect能够被stop
+    runner.effect = _effect;
+
+    return runner;
 }
+
+export function stop(runner) {
+    // 调用ReactiveEffect的stop方法
+    runner.effect.stop();
+};
