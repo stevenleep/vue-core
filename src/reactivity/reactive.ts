@@ -7,7 +7,6 @@ export function reactive(raw) {
             track(target, property);
             return Reflect.get(target, property)
         },
-
         set(target, property, value) {
             const nextValue = Reflect.set(target, property, value)
             // 触发依赖更新
