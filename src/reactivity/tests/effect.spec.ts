@@ -27,5 +27,33 @@ describe("effect", () => {
         const result = runner();
         expect(foo).toBe(12);
         expect(result).toBe("bar");
+    });
+
+    it("scheduler", () => {
+        let dummy;
+        let run;
+
+        const obj = reactive({ foo: 1 });
+        const scheduler = jest.fn(() => {
+            run = runner;
+        });
+
+        const runner = effect(() => {
+            dummy = obj.foo;
+        }, { scheduler });
+
+        expect(scheduler).not.toHaveBeenCalled();
+        expect(dummy).toBe(1);
+
+        // update
+        // should be called on first trigger
+        obj.foo++;
+        expect(scheduler).toHaveBeenCalledTimes(1);
+
+        // should not run yet
+        expect(dummy).toBe(1);
+        // manually run
+        run();
+        expect(dummy).toBe(2);
     })
 });

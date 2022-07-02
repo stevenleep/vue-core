@@ -1,6 +1,6 @@
 let activeEffect: ReactiveEffect | null = null
 class ReactiveEffect {
-    constructor(private _fn: Function) { }
+    constructor(private _fn: Function, public scheduler?) { }
     run() {
         activeEffect = this;
         return this._fn();
@@ -34,10 +34,24 @@ export function trigger(target, property) {
         }
     }
 }
-function runReactiveEffect(effect: ReactiveEffect) { effect.run(); }
 
-export function effect(fn) {
-    const _effect = new ReactiveEffect(fn);
+function runReactiveEffect(effect: ReactiveEffect) {
+    if (effect.scheduler) {
+        effect.scheduler()
+    } else {
+        effect.run();
+    }
+
+}
+
+
+
+interface EffectOptions {
+    scheduler?: () => void;
+}
+
+export function effect(fn, effectOptions?: EffectOptions) {
+    const _effect = new ReactiveEffect(fn, effectOptions?.scheduler);
     _effect.run();
     return _effect.run.bind(_effect);
 }
