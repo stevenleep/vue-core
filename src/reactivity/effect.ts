@@ -1,16 +1,31 @@
+import { extend } from "../shared";
+
 let activeEffect: ReactiveEffect | null = null
 class ReactiveEffect {
     deps: (Set<any>)[] = []
+    active = true;
+    onStop?: () => void
     constructor(private _fn: Function, public scheduler?) { }
     run() {
         activeEffect = this;
         return this._fn();
     }
+
     stop() {
-        this.deps.forEach((dep: Set<any>) => {
-            dep.delete(this);
-        });
+        if (this.active) {
+            cleanupEffect(this);
+            if (this.onStop) {
+                this.onStop();
+            }
+            this.active = false;
+        }
     }
+}
+
+function cleanupEffect(effect) {
+    effect.deps.forEach((dep: Set<any>) => {
+        dep.delete(effect);
+    });
 }
 
 const targetMap = new Map;
@@ -27,10 +42,13 @@ export function track(target, property) {
         propertyDepsMap.set(property, new Set);
     }
     const propertyDeps = propertyDepsMap.get(property);
-    propertyDeps.add(activeEffect);
 
-    // 反向收集, 用于在activeEffect中使用deps
-    activeEffect?.deps.push(propertyDeps);
+    // activeEffect 只有在effect中的时候才会存在,当只是单纯的响应式对象取值的时候并不存在
+    if (activeEffect) {
+        propertyDeps.add(activeEffect);
+        // 反向收集, 用于在activeEffect中使用deps
+        activeEffect?.deps.push(propertyDeps);
+    }
 }
 
 // 触发依赖
@@ -51,13 +69,15 @@ function runReactiveEffect(effect: ReactiveEffect) {
     }
 }
 
-
 interface EffectOptions {
     scheduler?: () => void;
+    onStop?: () => void;
 }
 
 export function effect(fn, effectOptions?: EffectOptions) {
-    const _effect = new ReactiveEffect(fn, effectOptions?.scheduler);
+    const _effect = new ReactiveEffect(fn, effectOptions?.scheduler,);
+    extend(_effect, effectOptions);
+
     _effect.run();
     const runner: any = _effect.run.bind(_effect);
 
