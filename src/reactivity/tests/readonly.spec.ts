@@ -1,4 +1,4 @@
-import { readonly, isReadonly } from "../reactive";
+import { readonly, isReadonly, shallowReadonly } from "../reactive";
 
 describe("readonly", () => {
     it("should return a readonly proxy", () => {
@@ -41,3 +41,11 @@ describe("nested readonly example: ", () => {
         expect(isReadonly(observedUser.des)).toBe(true);
     });
 })
+
+describe("shallow readonly example: ", () => {
+    it("basic shallow isReadonly example: ", () => {
+        const props = shallowReadonly({ foo: { bar: "bar" } });
+        expect(isReadonly(props)).toBe(true);
+        expect(isReadonly(props.foo)).toBe(false);
+    })
+});

@@ -1,4 +1,4 @@
-import { reactive, isReactive } from "../reactive";
+import { reactive, isReactive, shallowReactive } from "../reactive";
 
 describe("reactive", () => {
     it("basic reactive example: ", () => {
@@ -19,4 +19,13 @@ describe("isReactive", () => {
         expect(isReactive(originalUser)).toBe(false);
         expect(isReactive(observedUser)).toBe(true);
     });
+})
+
+describe("shallow reactive", () => {
+    it("basic shallow reactive example: ", () => {
+        const originalUser = { age: 10, obj: { c: 10 } };
+        const observedUser = shallowReactive(originalUser);
+        expect(isReactive(observedUser)).toBe(true);
+        expect(isReactive(observedUser.obj)).toBe(false);
+    })
 })
