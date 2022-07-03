@@ -1,4 +1,4 @@
-import { readonly, isReadonly, shallowReadonly } from "../reactive";
+import { readonly, isReadonly, shallowReadonly, isProxy } from "../reactive";
 
 describe("readonly", () => {
     it("should return a readonly proxy", () => {
@@ -16,6 +16,12 @@ describe("readonly", () => {
 
         proxy.a = 20;
         expect(console.warn).toBeCalled();
+    })
+
+    it("isProxy", () => {
+        const target = { a: 1 };
+        const proxy = readonly(target);
+        expect(isProxy(proxy)).toBe(true);
     })
 })
 

@@ -1,4 +1,4 @@
-import { reactive, isReactive, shallowReactive } from "../reactive";
+import { reactive, isReactive, shallowReactive, isProxy } from "../reactive";
 
 describe("reactive", () => {
     it("basic reactive example: ", () => {
@@ -10,6 +10,11 @@ describe("reactive", () => {
         // observedUser user.age should be originalUser age(10)
         expect(observedUser.age).toBe(10);
     });
+    it("isProxy", () => {
+        const originalUser = { age: 10 };
+        const observedUser = reactive(originalUser);
+        expect(isProxy(observedUser)).toBe(true);
+    })
 })
 
 describe("isReactive", () => {
