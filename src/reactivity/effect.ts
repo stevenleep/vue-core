@@ -3,7 +3,7 @@ import { extend } from "../shared";
 let activeEffect: ReactiveEffect | null = null;
 let shouldTrack: boolean;
 
-class ReactiveEffect {
+export class ReactiveEffect {
     deps: (Set<any>)[] = []
     active = true;
     onStop?: () => void
@@ -50,19 +50,20 @@ export function track(target, property) {
         targetMap.set(target, new Map);
     }
     const propertyDepsMap = targetMap.get(target);
-
     if (!propertyDepsMap.has(property)) {
         propertyDepsMap.set(property, new Set);
     }
-    const propertyDeps = propertyDepsMap.get(property);
+    trackEffects(propertyDepsMap.get(property))
+}
 
+export function trackEffects(propertyDeps) {
     if (propertyDeps.has(activeEffect)) { return }
     propertyDeps.add(activeEffect);
     // 反向收集, 用于在activeEffect中使用deps
     activeEffect?.deps.push(propertyDeps);
 }
 
-function isTracking() {
+export function isTracking() {
     // activeEffect 只有在effect中的时候才会存在,当只是单纯的响应式对象取值的时候并不存在
     return shouldTrack && activeEffect !== null;
 }
@@ -71,17 +72,17 @@ function isTracking() {
 export function trigger(target, property) {
     const deps = targetMap.get(target).get(property);
     if (deps) {
-        for (const effect of deps) {
-            runReactiveEffect(effect);
-        }
+        triggerEffects(deps);
     }
 }
 
-function runReactiveEffect(effect: ReactiveEffect) {
-    if (effect.scheduler) {
-        effect.scheduler()
-    } else {
-        effect.run();
+export function triggerEffects(deps: Set<ReactiveEffect>) {
+    for (const effect of deps) {
+        if (effect.scheduler) {
+            effect.scheduler()
+        } else {
+            effect.run();
+        }
     }
 }
 
