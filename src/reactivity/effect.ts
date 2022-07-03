@@ -38,6 +38,7 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep: Set<any>) => {
         dep.delete(effect);
     });
+    effect.deps.length = 0;
 }
 
 const targetMap = new Map;
