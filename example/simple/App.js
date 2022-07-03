@@ -1,3 +1,5 @@
+import { h } from "../../lib/m-vue.esm.js";
+
 export const App = {
   // vue template -> render
   render() {

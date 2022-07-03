@@ -5,7 +5,9 @@ export function render(vnode, container) {
 }
 
 export function patch(vnode, container) {
-    // TODO: 判断是element
+    // TODO(branlice): 判断是element 还是component
+    // processElement(vnode, container);
+
     processComponent(vnode, container);
 }
 
@@ -18,10 +20,12 @@ function mountComponent(vnode, container) {
     setupComponent(instance);
     setupRenderEffect(instance, container);
 }
-
-// TODO: render subTree
 function setupRenderEffect(instance, container) {
     const subTree = instance.render();
     // vnode -> patch
     patch(subTree, container)
 }
+
+// function processElement(vnode: any, container: any) {
+    
+// }
