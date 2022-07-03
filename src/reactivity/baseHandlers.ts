@@ -1,4 +1,5 @@
 import { track, trigger } from "./effect";
+import { ReactiveFlags } from "./reactive";
 
 const mutableGet = createGetter();
 const readonlyGet = createGetter(true);
@@ -18,6 +19,17 @@ export const readonlyHandlers = {
 
 function createGetter(isReadonly: boolean = false) {
     return function get(target, property) {
+        // isReactive Check
+        if (property === ReactiveFlags.IS_REACTIVE) {
+            return !isReadonly;
+        }
+
+        // isReadonly Check
+        if (property === ReactiveFlags.IS_READONLY) {
+            return isReadonly;
+        }
+
+        // normal logical get
         if (!isReadonly) {
             track(target, property);
         }
@@ -26,8 +38,7 @@ function createGetter(isReadonly: boolean = false) {
 }
 function createSetter() {
     return function set(target, property, value) {
-        const nextValue = Reflect.set(target, property, value)
-        // 触发依赖更新
+        const nextValue = Reflect.set(target, property, value);
         trigger(target, property);
         return nextValue
     }
