@@ -1,11 +1,15 @@
 # Reactive API
 
 - [ ] reactive
-    - [ ] Reactive: Define a responsive object and the effect fn will be collected;
-    - [ ] Readonly：Define a read-only mode object based on proxy;
-    - [ ] isReactive：Check for reactive object;
-    - [ ] isReadonly: Check for readonly object;
+    - [X] Reactive: Define a responsive object and the effect fn will be collected;
+    - [X] Readonly：Define a read-only mode object based on proxy;
+    - [X] isReactive：Check for reactive object;
+    - [X] isReadonly: Check for readonly object;
+    - [X] shallowReactive
+    - [X] shallowReadonly
+    - [X] isShallowReactive
+    - [X] isShallowReactive
 - [ ] effect
-    - [ ] effect：for track dependencies and updating them
-    - [ ] scheduler：scheduler
-    - [ ] stop：Stop track on dependencies
+    - [X] effect：for track dependencies and updating them
+    - [X] scheduler：scheduler
+    - [X] stop：Stop track on dependencies
