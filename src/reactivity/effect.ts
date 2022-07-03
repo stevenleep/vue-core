@@ -1,14 +1,26 @@
 import { extend } from "../shared";
 
-let activeEffect: ReactiveEffect | null = null
+let activeEffect: ReactiveEffect | null = null;
+let shouldTrack: boolean;
+
 class ReactiveEffect {
     deps: (Set<any>)[] = []
     active = true;
     onStop?: () => void
     constructor(private _fn: Function, public scheduler?) { }
     run() {
+        // 标识是否需要收集依赖
+        if (!this.active) {
+            return this._fn();
+        }
+
+        shouldTrack = true;
         activeEffect = this;
-        return this._fn();
+
+        const result = this._fn();
+        shouldTrack = false;
+
+        return result;
     }
 
     stop() {
@@ -44,11 +56,12 @@ export function track(target, property) {
     const propertyDeps = propertyDepsMap.get(property);
 
     // activeEffect 只有在effect中的时候才会存在,当只是单纯的响应式对象取值的时候并不存在
-    if (activeEffect) {
-        propertyDeps.add(activeEffect);
-        // 反向收集, 用于在activeEffect中使用deps
-        activeEffect?.deps.push(propertyDeps);
-    }
+    if (!activeEffect) return;
+    if (!shouldTrack) return;
+
+    propertyDeps.add(activeEffect);
+    // 反向收集, 用于在activeEffect中使用deps
+    activeEffect?.deps.push(propertyDeps);
 }
 
 // 触发依赖

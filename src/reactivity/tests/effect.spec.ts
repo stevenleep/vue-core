@@ -74,7 +74,8 @@ describe("effect stop", () => {
 
         // stop 暂停1次
         stop(runner);
-        obj.foo = 3;
+        // obj.foo = 3; // 只会涉及到set
+        obj.foo++;  // -->obj.foo = obj.foo + 1; // 会涉及到get和set两个操作（涉及到get又会被重新收集）
         expect(dummy).toBe(2);
 
         // 继续调用runner还是会再次执行
