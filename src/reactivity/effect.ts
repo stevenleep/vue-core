@@ -8,6 +8,7 @@ export class ReactiveEffect {
     active = true;
     onStop?: () => void
     constructor(private _fn: Function, public scheduler?) { }
+
     run() {
         // 标识是否需要收集依赖
         if (!this.active) {
