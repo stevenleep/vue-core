@@ -1,5 +1,6 @@
+import { isObject } from "../shared";
 import { track, trigger } from "./effect";
-import { ReactiveFlags } from "./reactive";
+import { reactive, ReactiveFlags, readonly } from "./reactive";
 
 const mutableGet = createGetter();
 const readonlyGet = createGetter(true);
@@ -23,19 +24,23 @@ function createGetter(isReadonly: boolean = false) {
         if (property === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly;
         }
-
         // isReadonly Check
         if (property === ReactiveFlags.IS_READONLY) {
             return isReadonly;
         }
 
+        const value = Reflect.get(target, property);
+        if (isObject(value)) {
+            return isReadonly ? readonly(value) : reactive(value)
+        }
         // normal logical get
         if (!isReadonly) {
             track(target, property);
         }
-        return Reflect.get(target, property)
+        return value;
     }
 }
+
 function createSetter() {
     return function set(target, property, value) {
         const nextValue = Reflect.set(target, property, value);

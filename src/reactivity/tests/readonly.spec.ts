@@ -27,3 +27,17 @@ describe("isReadonly", () => {
         expect(isReadonly(observedUser)).toBe(true);
     });
 })
+
+describe("nested readonly example: ", () => {
+    it("basic nested isReadonly example: ", () => {
+        const originalUser = {
+            age: 10,
+            des: {
+                name: "John"
+            }
+        };
+        const observedUser = readonly(originalUser);
+        expect(isReadonly(observedUser)).toBe(true);
+        expect(isReadonly(observedUser.des)).toBe(true);
+    });
+})

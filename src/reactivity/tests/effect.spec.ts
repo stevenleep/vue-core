@@ -1,5 +1,5 @@
 import { effect, stop } from "../effect";
-import { reactive } from "../reactive";
+import { isReactive, reactive } from "../reactive";
 
 describe("effect", () => {
     it("should work with basic effect", () => {
@@ -100,3 +100,29 @@ describe("effect unstop", () => {
         expect(onStop).toHaveBeenCalledTimes(1);
     })
 });
+
+describe("nested reactive", () => {
+    it("should work with array", () => {
+        const obj = {
+            first: 100,
+            arr: [{ bar: "bar" }]
+        }
+
+        const reactiveObj = reactive(obj);
+        expect(isReactive(reactiveObj)).toBe(true);
+
+        expect(isReactive(reactiveObj.arr)).toBe(true);
+        expect(isReactive(reactiveObj.arr[0])).toBe(true);
+    })
+
+    it("should work with object", () => {
+        const obj = {
+            first: 100,
+            obj: {
+                foo: "foo"
+            }
+        }
+        const reactiveObj = reactive(obj);
+        expect(isReactive(reactiveObj.obj)).toBe(true);
+    })
+})
