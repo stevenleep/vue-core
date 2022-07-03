@@ -42,8 +42,8 @@ function cleanupEffect(effect) {
 }
 
 const targetMap = new Map;
-// 依赖收集
 export function track(target, property) {
+    if (!isTracking()) { return }
     // 通过target找到property, 在通过property找到对应的deps
     // target -> property -> deps -> call dep fn;
     if (!targetMap.has(target)) {
@@ -56,13 +56,15 @@ export function track(target, property) {
     }
     const propertyDeps = propertyDepsMap.get(property);
 
-    // activeEffect 只有在effect中的时候才会存在,当只是单纯的响应式对象取值的时候并不存在
-    if (!activeEffect) return;
-    if (!shouldTrack) return;
-
+    if (propertyDeps.has(activeEffect)) { return }
     propertyDeps.add(activeEffect);
     // 反向收集, 用于在activeEffect中使用deps
     activeEffect?.deps.push(propertyDeps);
+}
+
+function isTracking() {
+    // activeEffect 只有在effect中的时候才会存在,当只是单纯的响应式对象取值的时候并不存在
+    return shouldTrack && activeEffect !== null;
 }
 
 // 触发依赖
