@@ -13,6 +13,8 @@ class RefImpl {
     public deps;
     private _rawValue;
 
+    public _v_isRef: boolean = true;
+
     // 扩展参数: shallow, readonly, rewrite
     private _options: RefConstructorOptions = {};
     constructor(initValue, options: RefConstructorOptions = {}) {
@@ -53,4 +55,27 @@ export function ref(value) {
     return new RefImpl(value);
 }
 
+export function isRef(ref): boolean {
+    return !!ref._v_isRef;
+}
 
+// XXX: 思考? unRef后是否会丢失reactive功能
+export function unRef(ref: RefImpl | any) {
+    return isRef(ref) ? ref.value : ref;
+}
+
+export function proxyRefs(objectWithRef) {
+    return new Proxy(objectWithRef, {
+        get(target, property, receiver) {
+            return unRef(Reflect.get(target, property));
+        },
+        set(target, property, value) {
+            const oldValueReference = Reflect.get(target, property);
+            if (isRef(oldValueReference) && !isRef(value)) {
+                return Reflect.set(oldValueReference, "value", value);
+            } else {
+                return Reflect.set(target, property, value);
+            }
+        },
+    })
+}
