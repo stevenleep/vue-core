@@ -9,6 +9,12 @@
     - [X] shallowReadonly
     - [X] isShallowReactive
     - [X] isShallowReactive
+- [ ] ref
+    - [x] ref
+    - [x] enhance ref: rewrite ref setter and readonly/shallow ref(TODO)
+    - [ ] isRef
+    - [ ] unRef
+    - [ ] proxyRefs
 - [ ] effect
     - [X] effect：for track dependencies and updating them
     - [X] scheduler：scheduler
