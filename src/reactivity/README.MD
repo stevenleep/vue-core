@@ -1,6 +1,6 @@
 # Reactive API
 
-- [ ] reactive
+- [x] reactive
     - [X] Reactive: Define a responsive object and the effect fn will be collected;
     - [X] Readonly：Define a read-only mode object based on proxy;
     - [X] isReactive：Check for reactive object;
@@ -9,13 +9,16 @@
     - [X] shallowReadonly
     - [X] isShallowReactive
     - [X] isShallowReactive
-- [ ] ref
+- [x] ref
     - [x] ref
     - [x] enhance ref: rewrite ref setter and readonly/shallow ref(TODO)
-    - [ ] isRef
-    - [ ] unRef
-    - [ ] proxyRefs
-- [ ] effect
+    - [X] isRef
+    - [X] unRef
+    - [X] proxyRefs
+- [x] effect
     - [X] effect：for track dependencies and updating them
     - [X] scheduler：scheduler
     - [X] stop：Stop track on dependencies
+- [x] computed
+    - [x] computed
+    - [x] computed cache
