@@ -1,0 +1,3 @@
+function eachElement(array, handler) {
+
+}

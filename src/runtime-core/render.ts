@@ -1,3 +1,4 @@
+import { isArray, isString, isStructObject } from "../shared/index";
 import { createComponentInstance, setupComponent } from "./component";
 
 export function render(vnode, container) {
@@ -6,9 +7,16 @@ export function render(vnode, container) {
 
 export function patch(vnode, container) {
     // TODO(branlice): 判断是element 还是component
-    // processElement(vnode, container);
+    if (typeof vnode.type === "string") {
+        processElement(vnode, container);
+    }
+    if (isStructObject(vnode.type)) {
+        processComponent(vnode, container);
+    }
+}
 
-    processComponent(vnode, container);
+function processElement(vnode: any, container: any) {
+    mountElement(vnode, container);
 }
 
 function processComponent(vnode, container) {
@@ -20,12 +28,40 @@ function mountComponent(vnode, container) {
     setupComponent(instance);
     setupRenderEffect(instance, container);
 }
-function setupRenderEffect(instance, container) {
-    const subTree = instance.render();
-    // vnode -> patch
-    patch(subTree, container)
+
+function mountElement(vnode: any, container: any) {
+    // vnode type -> div/span
+    const el = document.createElement(vnode.type);
+
+    // children
+    if (isString(vnode.children)) {
+        el.textContent = vnode.children;
+    } else if (isArray(vnode.children)) {
+        mountChildren(vnode.children, el);
+    }
+
+    // props
+    addAttrs(vnode, el);
+
+    // append to container
+    container.appendChild(el);
 }
 
-// function processElement(vnode: any, container: any) {
-    
-// }
+function mountChildren(children = [], container) {
+    children.forEach(child => { patch(child, container) })
+}
+
+function addAttrs(vnode, container) {
+    const props = vnode.props || {};
+    for (const key in props) {
+        if (Object.prototype.hasOwnProperty.call(props, key)) {
+            const value = props[key];
+            container.setAttribute(key, value);
+        }
+    }
+}
+
+function setupRenderEffect(instance, container) {
+    const subTree = instance.render();
+    patch(subTree, container)
+}
