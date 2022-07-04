@@ -8,15 +8,11 @@ export const App = {
       {
         class: "red",
         onClick() {
-          console.log("click");
-        },
-        onMousemove() {
-          console.log("mousemove");
+          alert("you clicked on me!");
         },
       },
       this.msg
     );
-
     // return h(
     //   "div",
     //   {
