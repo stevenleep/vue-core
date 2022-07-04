@@ -50,12 +50,23 @@ function mountChildren(children = [], container) {
     children.forEach(child => { patch(child, container) })
 }
 
+function isOnEvent(propertyName) {
+    return /^on[A-Z]/.test(propertyName)
+}
+isOnEvent.getEventName = function onEventName(propertyName) {
+    return propertyName.slice(2).toLowerCase()
+}
+
 function addAttrs(vnode, container) {
     const props = vnode.props || {};
     for (const key in props) {
         if (Object.prototype.hasOwnProperty.call(props, key)) {
             const value = props[key];
-            container.setAttribute(key, value);
+            if (isOnEvent(key)) {
+                container.addEventListener(isOnEvent.getEventName(key), value, false);
+            } else {
+                container.setAttribute(key, value);
+            }
         }
     }
 }
