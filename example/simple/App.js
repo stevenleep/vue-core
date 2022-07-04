@@ -16,14 +16,14 @@ export const App = {
           {
             class: "red",
           },
-          "shi-wen-red"
+          `${this.msg}`
         ),
         h(
           "div",
           {
             class: "blue",
           },
-          "shi-wen-blue"
+          `Hello Branlice ${this.subMessage}`
         ),
       ]
     );
@@ -31,7 +31,8 @@ export const App = {
 
   setup() {
     return {
-      msg: "hello world",
+      msg: "hello world 2022",
+      subMessage: "good luck!",
     };
   },
 };

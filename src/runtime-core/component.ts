@@ -1,27 +1,38 @@
-import { isStructObject } from "../shared";
+import { isStructObject } from "../shared/type";
 
 export function createComponentInstance(vnode) {
     const component = {
         vnode,
         type: vnode.type,
+        setupState: {}
     }
     return component;
 }
 
 
 export function setupComponent(instance) {
-    // initProps();
+    initProps(instance);
     // initSlots();
     setupStatefulComponent(instance);
 }
 
 // props
-function initProps() {
-    throw new Error("Function not implemented.");
+function initProps(instance) {
+    console.log(instance)
 }
 
 function setupStatefulComponent(instance) {
     const Component = instance.type;
+
+    const context = {};
+    instance.proxy = new Proxy(context, {
+        get(target, key) {
+            if (key in instance.setupState) {
+                return instance.setupState[key];
+            }
+        }
+    });
+
     if (Component.setup) {
         const setupResult = Component.setup();
         handleSetupResult(instance, setupResult);
@@ -29,7 +40,6 @@ function setupStatefulComponent(instance) {
 }
 
 function handleSetupResult(instance, setupResult: any) {
-    // TODO: function or object
     if (isStructObject(setupResult)) {
         instance.setupState = setupResult;
     }

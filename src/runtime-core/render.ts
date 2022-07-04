@@ -62,6 +62,6 @@ function addAttrs(vnode, container) {
 }
 
 function setupRenderEffect(instance, container) {
-    const subTree = instance.render();
+    const subTree = instance.render.call(instance.proxy);
     patch(subTree, container)
 }
