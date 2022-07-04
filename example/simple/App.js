@@ -1,8 +1,12 @@
 import { h } from "../../lib/m-vue.esm.js";
 
+// debugger instance
+window.vueInstance = null;
+
 export const App = {
   // vue template -> render
   render() {
+    window.vueInstance = this;
     // return h("div", {}, "shi-wen" + this.msg);
     return h(
       "div",

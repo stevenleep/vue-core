@@ -1,4 +1,6 @@
 import { isStructObject } from "../shared/type";
+import { ComponentPublicInstanceHandlers } from "./componentPublicInstance";
+
 
 export function createComponentInstance(vnode) {
     const component = {
@@ -8,7 +10,6 @@ export function createComponentInstance(vnode) {
     }
     return component;
 }
-
 
 export function setupComponent(instance) {
     initProps(instance);
@@ -23,16 +24,8 @@ function initProps(instance) {
 
 function setupStatefulComponent(instance) {
     const Component = instance.type;
-
-    const context = {};
-    instance.proxy = new Proxy(context, {
-        get(target, key) {
-            if (key in instance.setupState) {
-                return instance.setupState[key];
-            }
-        }
-    });
-
+    const context = { _instance: instance, _component: Component };
+    instance.proxy = new Proxy(context, ComponentPublicInstanceHandlers);
     if (Component.setup) {
         const setupResult = Component.setup();
         handleSetupResult(instance, setupResult);

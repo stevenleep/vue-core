@@ -26,12 +26,13 @@ function processComponent(vnode, container) {
 function mountComponent(vnode, container) {
     const instance = createComponentInstance(vnode);
     setupComponent(instance);
-    setupRenderEffect(instance, container);
+    setupRenderEffect(instance, container, vnode);
 }
 
 function mountElement(vnode: any, container: any) {
     // vnode type -> div/span
-    const el = document.createElement(vnode.type);
+    // vnode.el -> element.el
+    const el = (vnode.el = document.createElement(vnode.type));
 
     // children
     if (isString(vnode.children)) {
@@ -61,7 +62,9 @@ function addAttrs(vnode, container) {
     }
 }
 
-function setupRenderEffect(instance, container) {
+function setupRenderEffect(instance, container, vnode) {
     const subTree = instance.render.call(instance.proxy);
-    patch(subTree, container)
+    patch(subTree, container);
+
+    vnode.el = subTree.el;
 }
