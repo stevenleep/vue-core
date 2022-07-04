@@ -1,4 +1,5 @@
 import { isArray, isString, isStructObject } from "../shared/index";
+import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 
 export function render(vnode, container) {
@@ -6,11 +7,10 @@ export function render(vnode, container) {
 }
 
 export function patch(vnode, container) {
-    // TODO(branlice): 判断是element 还是component
-    if (typeof vnode.type === "string") {
+    if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
         processElement(vnode, container);
     }
-    if (isStructObject(vnode.type)) {
+    if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
         processComponent(vnode, container);
     }
 }
@@ -33,14 +33,12 @@ function mountElement(vnode: any, container: any) {
     // vnode type -> div/span
     // vnode.el -> element.el
     const el = (vnode.el = document.createElement(vnode.type));
-
     // children
-    if (isString(vnode.children)) {
+    if (vnode.shapeFlag & ShapeFlags.TEXT_CHILDREN) {
         el.textContent = vnode.children;
-    } else if (isArray(vnode.children)) {
+    } else if (vnode.shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(vnode.children, el);
     }
-
     // props
     addAttrs(vnode, el);
 
