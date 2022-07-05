@@ -1,3 +1,4 @@
+import { isStructObject } from "../shared/type";
 import { mutableHandlers, readonlyHandlers, shallowReactiveHandlers, shallowReadonlyHandlers } from "./baseHandlers";
 
 export const enum ReactiveFlags {
@@ -8,6 +9,10 @@ export const enum ReactiveFlags {
 }
 
 function createReactiveObject(raw, baseHandlers) {
+    if (!isStructObject(raw)) {
+        console.warn("the value to be proxies is not an object: " + raw);
+        return
+    };
     return new Proxy(raw, baseHandlers);
 }
 export function reactive(raw) {
