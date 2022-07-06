@@ -11,9 +11,13 @@ export default {
       SlotInstance,
       {},
       // 在Slot Children设置Slot Component, 期望可以在内部显示出来
-      h("span", {}, "这是插入的内容")
+      {
+        header: h("span", {}, "Header"),
+        footer: h("span", {}, "Footer"),
+      }
     );
     return h("div", {}, [Bar, Slot]);
   },
+
   setup() {},
 };
