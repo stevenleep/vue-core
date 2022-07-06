@@ -1,5 +1,5 @@
 import { ShapeFlags } from "../shared/ShapeFlags";
-import { isArray, isString } from "../shared/type";
+import { isArray, isString, isStructObject } from "../shared/type";
 
 export function createVNode(type, props?, children?) {
     const vnode = {
@@ -27,5 +27,10 @@ function childrenShapeFlag(vNode) {
     }
     if (isArray(vNode.children)) {
         vNode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
+    }
+
+    // slots children
+    if (vNode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT && isStructObject(vNode.children)) {
+        vNode.shapeFlag |= ShapeFlags.SLOT_CHILDREN;
     }
 }
