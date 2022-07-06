@@ -5,15 +5,16 @@ import BarInstance from "./Bar.js";
 export default {
   render() {
     const Bar = h(BarInstance);
-
     // NOTE: slot example
     const Slot = h(
       SlotInstance,
       {},
       // 在Slot Children设置Slot Component, 期望可以在内部显示出来
       {
-        header: h("span", {}, "Header"),
-        footer: h("span", {}, "Footer"),
+        header: ({ count }) => h("span", {}, "Header " + count),
+        footer: ({ clickedNumbers }) =>
+          h("span", {}, "Footer" + clickedNumbers),
+        content: h("span", {}, "Original"),
       }
     );
     return h("div", {}, [Bar, Slot]);
