@@ -1,7 +1,8 @@
 import { hasOwnProperty } from "../shared/index";
 
 export const PublicPropertiesMaps = {
-    "$el": (instance) => instance.vnode.el,
+    $el: (instance) => instance.vnode.el,
+    $slots: (instance) => instance.slots,
 };
 export const ComponentPublicInstanceHandlers = {
     get({ _instance }, key) {

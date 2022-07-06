@@ -72,7 +72,7 @@ function addAttrs(vnode, container) {
 }
 
 function setupRenderEffect(instance, container, initialVNode) {
-    const subTree = instance.render.call(instance.proxy);
+    const subTree = instance?.render.call(instance.proxy);
     patch(subTree, container);
 
     initialVNode.el = subTree.el;

@@ -3,6 +3,7 @@ import { isStructObject } from "../shared/type";
 import { emit, extendRuntimeInstance } from "./componentEmit";
 import { initProps } from "./componentProps";
 import { ComponentPublicInstanceHandlers } from "./componentPublicInstance";
+import { initSlots } from "./componentSlots";
 
 // TODO: runtime instance extend
 // NOTE: 这是自己扩展的
@@ -15,6 +16,7 @@ export function createComponentInstance(vnode) {
         type: vnode.type,
         setupState: {},
         props: {},
+        slots: {},
         emit: (instance, event) => { },
     };
 
@@ -30,7 +32,7 @@ export function createComponentInstance(vnode) {
 
 export function setupComponent(instance) {
     initProps(instance, instance.vnode.props);
-    // initSlots();
+    initSlots(instance, instance.vnode.children);
     setupStatefulComponent(instance);
 }
 

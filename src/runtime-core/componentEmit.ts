@@ -14,11 +14,9 @@ export function emit(instance, eventProperty, ...args) {
 
 // TODO: 运行时扩展实例
 export function extendRuntimeInstance(instance, extendApis = {}) {
-    console.log("extendApis", extendApis);
     // XXX: 临时解决方案
     // TODO: 待完善扩展实例
     Object.keys(extendApis).forEach(key => {
         instance[key] = extendApis[key];
-        console.log(key, extendApis[key])
     });
 }
