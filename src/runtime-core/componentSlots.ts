@@ -1,12 +1,19 @@
 import { isArray, isStructObject } from "../shared/type";
 
 export function initSlots(instance, instanceChildren) {
+    instance.slots = normalizeObjectSlots(instanceChildren);
+};
+
+export function normalizeObjectSlots(instanceChildren) {
     let slots = {};
     if (isStructObject(instanceChildren)) {
         for (const key in instanceChildren) {
-            const slot = instanceChildren[key];
-            slots[key] = isArray(slot) ? slot : [slot];
+            slots[key] = normalizeSlot(instanceChildren[key]);
         }
     };
-    instance.slots = slots;
-};
+    return slots;
+}
+
+export function normalizeSlot(value) {
+    return isArray(value) ? value : [value];
+}
