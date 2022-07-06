@@ -1,0 +1,21 @@
+{
+  "name": "branlice-reactivity",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "reactivity",
+    "reactive",
+    "reactive-property",
+    "proxy",
+    "vue3"
+  ],
+  "author": {
+    "name": "Branlice",
+    "email": "lishiwen@wclound.cn"
+  },
+  "license": "MIT"
+}
