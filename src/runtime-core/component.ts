@@ -11,7 +11,7 @@ let currentInstance = null;
 // NOTE: 这是自己扩展的
 import * as instanceRuntimeExtendApis from "./instanceRuntimeExtends";
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
     // instance
     const component = {
         vnode,
@@ -19,6 +19,8 @@ export function createComponentInstance(vnode) {
         setupState: {},
         props: {},
         slots: {},
+        parent,
+        provides: {},
         emit: (instance, event) => { },
     };
 
