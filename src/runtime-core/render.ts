@@ -1,5 +1,6 @@
 import { isArray, isString, isStructObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
+import { Fragment } from "../shared/SpecificBuiltinTags";
 import { createComponentInstance, setupComponent } from "./component";
 
 export function render(vnode, container) {
@@ -7,12 +8,20 @@ export function render(vnode, container) {
 }
 
 export function patch(vnode, container) {
-    if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
-        processElement(vnode, container);
+    switch (vnode.type) {
+        case Fragment:
+            processFragment(vnode, container);
+            break;
+        default:
+            if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
+                processElement(vnode, container);
+            }
+            if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+                processComponent(vnode, container);
+            }
+            break;
     }
-    if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-        processComponent(vnode, container);
-    }
+
 }
 
 function processElement(vnode: any, container: any) {
@@ -21,6 +30,10 @@ function processElement(vnode: any, container: any) {
 
 function processComponent(vnode, container) {
     mountComponent(vnode, container);
+}
+
+function processFragment(vnode: any, container: any) {
+    mountChildren(vnode.children, container);
 }
 
 function mountComponent(initialVNode, container) {
@@ -74,6 +87,5 @@ function addAttrs(vnode, container) {
 function setupRenderEffect(instance, container, initialVNode) {
     const subTree = instance?.render.call(instance.proxy);
     patch(subTree, container);
-
     initialVNode.el = subTree.el;
 }
