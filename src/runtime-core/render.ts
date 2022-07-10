@@ -3,42 +3,54 @@ import { Fragment } from "../shared/SpecificBuiltinTags";
 import { createComponentInstance, setupComponent } from "./component";
 import { Text } from "../shared/SpecificBuiltinTags";
 import { createAppAPI } from "./createApp";
+import { effect } from "../reactivity";
 
 export function createRenderer(customRenderOptions) {
     const { createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert } = customRenderOptions;
 
     function render(vnode, container, parentComponent) {
-        patch(vnode, container, parentComponent);
+        patch(null, vnode, container, parentComponent);
     }
 
-    function patch(vnode, container, parentComponent) {
-        switch (vnode?.type) {
+    // n1 --> oldSubtree
+    // n2 --> newSubtree
+    function patch(n1, n2, container, parentComponent) {
+        switch (n2?.type) {
             case Fragment:
-                processFragment(vnode, container, parentComponent);
+                processFragment(n1, n2, container, parentComponent);
                 break;
             case Text:
-                processText(vnode, container);
+                processText(n1, n2, container);
                 break;
             default:
-                if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
-                    processElement(vnode, container, parentComponent);
+                if (n2.shapeFlag & ShapeFlags.ELEMENT) {
+                    processElement(n1, n2, container, parentComponent);
                 }
-                if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-                    processComponent(vnode, container, parentComponent);
+                if (n2.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+                    processComponent(n1, n2, container, parentComponent);
                 }
                 break;
         }
 
     }
 
-    function processElement(vnode: any, container: any, parentComponent) {
-        mountElement(vnode, container, parentComponent);
+    function processElement(n1, n2: any, container: any, parentComponent) {
+        if (!n1) { // n1 不存在->初始化
+            mountElement(n2, container, parentComponent);
+        } else {
+            patchElement(n1, n2, container);
+        }
     }
-    function processComponent(vnode, container, parentComponent) {
-        mountComponent(vnode, container, parentComponent);
+    // TODO: 实现Element的更新
+    function patchElement(n1, n2, container) {
+        console.log("patchElement", n1, n2, container);
     }
-    function processFragment(vnode: any, container: any, parentComponent) {
-        mountChildren(vnode?.children, container, parentComponent);
+
+    function processComponent(n1, n2, container, parentComponent) {
+        mountComponent(n2, container, parentComponent);
+    }
+    function processFragment(n1, n2: any, container: any, parentComponent) {
+        mountChildren(n2?.children, container, parentComponent);
     }
     function mountComponent(initialVNode, container, parentComponent) {
         const instance = createComponentInstance(initialVNode, parentComponent);
@@ -57,7 +69,7 @@ export function createRenderer(customRenderOptions) {
     }
     function mountChildren(children = [], container, parentComponent) {
         children.forEach(child => {
-            patch(child, container, parentComponent)
+            patch(null, child, container, parentComponent)
         })
     }
 
@@ -70,15 +82,33 @@ export function createRenderer(customRenderOptions) {
             }
         }
     }
-    function setupRenderEffect(instance, container, initialVNode) {
-        const subTree = instance?.render?.call(instance.proxy);
-        patch(subTree, container, instance);
-        initialVNode.el = subTree.el;
-    }
-    function processText(vnode: any, container: any) {
-        const el = (vnode.el = document.createTextNode(vnode.children));
+    function processText(n1, n2: any, container: any) {
+        const el = (n2.el = document.createTextNode(n2.children));
         container.append(el);
     }
+
+    function setupRenderEffect(instance, container, initialVNode) {
+        effect(() => {
+            // initial
+            if (!instance.isMounted) {
+                // 当处于更新逻辑时， instance.subTree则为旧的数据（旧的VNode）
+                const subTree = (instance.subTree = instance?.render.call(instance.proxy));
+                patch(null, subTree, container, instance);
+                initialVNode.el = subTree.el;
+                instance.isMounted = true
+            } else {
+                // update
+                // 在更新时候可以认为是新的VNod, 和初始化时候的VNode进行对比
+                const subTree = instance?.render.call(instance.proxy);
+                const prevSubTree = instance.subTree;
+
+                // 设置为下一次对比的VNode
+                instance.subTree = subTree;
+                patch(prevSubTree, subTree, container, instance);
+            }
+        })
+    }
+
 
     return {
         createApp: createAppAPI(render),
