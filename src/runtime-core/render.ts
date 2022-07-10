@@ -1,16 +1,19 @@
-import { isArray, isString, isStructObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { Fragment } from "../shared/SpecificBuiltinTags";
 import { createComponentInstance, setupComponent } from "./component";
+import { Text } from "../shared/SpecificBuiltinTags";
 
 export function render(vnode, container) {
     patch(vnode, container);
 }
 
 export function patch(vnode, container) {
-    switch (vnode.type) {
+    switch (vnode?.type) {
         case Fragment:
             processFragment(vnode, container);
+            break;
+        case Text:
+            processText(vnode, container);
             break;
         default:
             if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
@@ -33,7 +36,7 @@ function processComponent(vnode, container) {
 }
 
 function processFragment(vnode: any, container: any) {
-    mountChildren(vnode.children, container);
+    mountChildren(vnode?.children, container);
 }
 
 function mountComponent(initialVNode, container) {
@@ -60,7 +63,9 @@ function mountElement(vnode: any, container: any) {
 }
 
 function mountChildren(children = [], container) {
-    children.forEach(child => { patch(child, container) })
+    children.forEach(child => {
+        patch(child, container)
+    })
 }
 
 function isOnEvent(propertyName) {
@@ -85,7 +90,12 @@ function addAttrs(vnode, container) {
 }
 
 function setupRenderEffect(instance, container, initialVNode) {
-    const subTree = instance?.render.call(instance.proxy);
+    const subTree = instance?.render?.call(instance.proxy);
     patch(subTree, container);
     initialVNode.el = subTree.el;
+}
+
+function processText(vnode: any, container: any) {
+    const el = (vnode.el = document.createTextNode(vnode.children));
+    container.append(el);
 }

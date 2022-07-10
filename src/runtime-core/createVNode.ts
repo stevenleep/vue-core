@@ -1,5 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { isArray, isString, isStructObject } from "../shared/type";
+import { Text } from "../shared/SpecificBuiltinTags";
 
 export function createVNode(type, props?, children?) {
     const vnode = {
@@ -33,4 +34,8 @@ function childrenShapeFlag(vNode) {
     if (vNode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT && isStructObject(vNode.children)) {
         vNode.shapeFlag |= ShapeFlags.SLOT_CHILDREN;
     }
+}
+
+export function createTextVNode(text: string) {
+    return createVNode(Text, {}, text);
 }
