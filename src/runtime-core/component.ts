@@ -1,3 +1,4 @@
+import { proxyRefs } from "../reactivity";
 import { shallowReadonly } from "../reactivity/reactive";
 import { isStructObject } from "../shared/type";
 import { emit, extendRuntimeInstance } from "./componentEmit";
@@ -20,6 +21,7 @@ export function createComponentInstance(vnode, parent) {
         props: {},
         slots: {},
         parent,
+        isMounted: false,
         provides: parent ? parent.provides : {},
         emit: (instance, event) => { },
     };
@@ -67,7 +69,7 @@ function setupStatefulComponent(instance) {
 
 function handleSetupResult(instance, setupResult: any) {
     if (isStructObject(setupResult)) {
-        instance.setupState = setupResult;
+        instance.setupState = proxyRefs(setupResult);
     }
     finishComponentSetup(instance);
 }
