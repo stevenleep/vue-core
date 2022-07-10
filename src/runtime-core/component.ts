@@ -5,6 +5,8 @@ import { initProps } from "./componentProps";
 import { ComponentPublicInstanceHandlers } from "./componentPublicInstance";
 import { initSlots } from "./componentSlots";
 
+let currentInstance = null;
+
 // TODO: runtime instance extend
 // NOTE: 这是自己扩展的
 import * as instanceRuntimeExtendApis from "./instanceRuntimeExtends";
@@ -42,6 +44,9 @@ function setupStatefulComponent(instance) {
     instance.proxy = new Proxy(context, ComponentPublicInstanceHandlers);
 
     if (Component.setup) {
+        // NOTE: getCurrentInstance() API 只能在 setup() 中调用
+        // 并且针对于每个组件都会拥有自己的组件实例
+        setCurrentInstance(instance);
         // props is readonly because it's a Reflect instance
         const readonlyProps = shallowReadonly(instance.props);
 
@@ -53,7 +58,7 @@ function setupStatefulComponent(instance) {
             // 这是自己扩展的API
             ...instanceRuntimeExtendApis
         });
-
+        clearCurrentInstance();
         handleSetupResult(instance, setupResult);
     }
 }
@@ -70,4 +75,17 @@ function finishComponentSetup(instance) {
     // if (Component.render) {
     instance.render = Component.render
     // }
+}
+
+
+export function getCurrentInstance() {
+    return currentInstance;
+}
+
+export function setCurrentInstance(instance) {
+    currentInstance = instance;
+}
+
+export function clearCurrentInstance() {
+    currentInstance = null
 }
