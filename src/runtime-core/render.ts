@@ -5,6 +5,7 @@ import { Text } from "../shared/SpecificBuiltinTags";
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity";
 
+const DEFAULT_EMPTY_OBJ = {};
 export function createRenderer(customRenderOptions) {
     const { createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert } = customRenderOptions;
 
@@ -41,9 +42,36 @@ export function createRenderer(customRenderOptions) {
             patchElement(n1, n2, container);
         }
     }
+
     // TODO: 实现Element的更新
     function patchElement(n1, n2, container) {
-        console.log("patchElement", n1, n2, container);
+        const oldProps = n1.props || DEFAULT_EMPTY_OBJ;
+        const newProps = n2.props || DEFAULT_EMPTY_OBJ;
+
+        const el = (n2.el = n1.el);
+        patchProps(el, oldProps, newProps);
+    }
+
+    function patchProps(el, oldProps, newProps) {
+        if (oldProps !== newProps) {
+            // 以前存在，现在也存在，但是值变化了
+            for (const key in newProps) {
+                const prevProp = oldProps[key];
+                const nextProp = newProps[key];
+                if (prevProp !== nextProp) {
+                    hostPatchProp(el, key, prevProp, nextProp);
+                }
+            }
+
+            // 原来存在，现在不存在
+            if (oldProps !== DEFAULT_EMPTY_OBJ) {
+                for (const key in oldProps) {
+                    if (!(key in newProps)) {
+                        hostPatchProp(el, key, oldProps[key], null);
+                    }
+                }
+            }
+        }
     }
 
     function processComponent(n1, n2, container, parentComponent) {
@@ -78,7 +106,7 @@ export function createRenderer(customRenderOptions) {
         for (const key in props) {
             if (Object.prototype.hasOwnProperty.call(props, key)) {
                 const value = props[key];
-                hostPatchProp(container, key, value);
+                hostPatchProp(container, key, null, value);
             }
         }
     }
@@ -108,7 +136,6 @@ export function createRenderer(customRenderOptions) {
             }
         })
     }
-
 
     return {
         createApp: createAppAPI(render),

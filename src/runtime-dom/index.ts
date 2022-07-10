@@ -10,9 +10,11 @@ isOnEvent.getEventName = function onEventName(propertyName) {
 function createElement(type) {
     return document.createElement(type);
 }
-function patchProp(el, key, value) {
+function patchProp(el, key, prevValue, value) {
     if (isOnEvent(key)) {
         el.addEventListener(isOnEvent.getEventName(key), value, false);
+    } else if (value === undefined || value === null) {
+        el.removeAttribute(key);
     } else {
         el.setAttribute(key, value);
     }
