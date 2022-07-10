@@ -7,17 +7,23 @@ import { getCurrentInstance } from "./component";
 export function provide(key, value) {
     const currentInstance: any = getCurrentInstance();
     if (currentInstance) {
-        mountProvide(currentInstance?.provides, key, value)
+        let { provides } = currentInstance;
+        const parentProvides = currentInstance.parent.provides;
+
+        // init
+        if (provides === parentProvides) {
+            provides = currentInstance.provides = Object.create(parentProvides);
+        }
+
+        provides[key] = value;
     }
-}
-function mountProvide(target, key, value) {
-    target[key] = value;
 }
 
 export function inject(key) {
     const currentInstance: any = getCurrentInstance();
     if (currentInstance) {
         const parentProvides = currentInstance.parent.provides;
+        console.log(key, parentProvides)
         return parentProvides[key];
     }
 }

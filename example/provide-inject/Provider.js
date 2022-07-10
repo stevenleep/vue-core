@@ -1,11 +1,11 @@
 import { h, provide } from "../../lib/m-vue.esm.js";
-import Consumer from "./Consumer.js";
+import ProvideTwo from "./ProvideTwo.js";
 
 export default {
   name: "Provider",
 
   render() {
-    return h("div", {}, [h(Consumer)]);
+    return h("div", {}, [h(ProvideTwo)]);
   },
 
   setup() {
