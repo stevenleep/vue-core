@@ -5,7 +5,7 @@ import { Text } from "../shared/SpecificBuiltinTags";
 import { createAppAPI } from "./createApp";
 
 export function createRenderer(customRenderOptions) {
-    const { createElement, patchProp, insert } = customRenderOptions;
+    const { createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert } = customRenderOptions;
 
     function render(vnode, container, parentComponent) {
         patch(vnode, container, parentComponent);
@@ -46,14 +46,14 @@ export function createRenderer(customRenderOptions) {
         setupRenderEffect(instance, container, initialVNode);
     }
     function mountElement(vnode: any, container: any, parentComponent) {
-        const el = (vnode.el = createElement(vnode.type))
+        const el = (vnode.el = hostCreateElement(vnode.type))
         if (vnode.shapeFlag & ShapeFlags.TEXT_CHILDREN) {
             el.textContent = vnode.children;
         } else if (vnode.shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
             mountChildren(vnode.children, el, parentComponent);
         }
         addAttrs(vnode, el);
-        insert(el, container);
+        hostInsert(el, container);
     }
     function mountChildren(children = [], container, parentComponent) {
         children.forEach(child => {
@@ -66,7 +66,7 @@ export function createRenderer(customRenderOptions) {
         for (const key in props) {
             if (Object.prototype.hasOwnProperty.call(props, key)) {
                 const value = props[key];
-                patchProp(container, key, value);
+                hostPatchProp(container, key, value);
             }
         }
     }
