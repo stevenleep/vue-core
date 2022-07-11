@@ -7,7 +7,13 @@ import { effect } from "../reactivity";
 
 const DEFAULT_EMPTY_OBJ = {};
 export function createRenderer(customRenderOptions) {
-    const { createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert } = customRenderOptions;
+    const {
+        createElement: hostCreateElement,
+        patchProp: hostPatchProp,
+        insert: hostInsert,
+        remove: hostRemove,
+        setElementText: hostSetElementText
+    } = customRenderOptions;
 
     function render(vnode, container, parentComponent) {
         patch(null, vnode, container, parentComponent);
@@ -49,7 +55,44 @@ export function createRenderer(customRenderOptions) {
         const newProps = n2.props || DEFAULT_EMPTY_OBJ;
 
         const el = (n2.el = n1.el);
+
+        patchChildren(n1, n2, el, container);
         patchProps(el, oldProps, newProps);
+    }
+
+    // TODO（lishiwen）: 更新Children更好的做法
+    function patchChildren(n1, n2, el, parentComponent) {
+        const oldShapeFlag = n1.shapeFlag;
+        const newShapeFlag = n2.shapeFlag;
+
+        // ArrayChildren -> TextChildren
+        // 由TextChildren -> TextChildren
+        if (newShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+            if (oldShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+                unmountChildren(n1.children);
+                hostSetElementText(el, n2.children);
+            } else if ((oldShapeFlag & ShapeFlags.TEXT_CHILDREN) && n1.children !== n2.children) {
+                // 由TextChildren -> TextChildren, 在两次结果不相同时候更新
+                hostSetElementText(el, n2.children);
+            }
+        }
+
+        // TextChildren -> ArrayChildren
+        if ((oldShapeFlag & ShapeFlags.TEXT_CHILDREN) & (newShapeFlag & ShapeFlags.ARRAY_CHILDREN)) {
+            hostSetElementText(el, "");
+            mountChildren(n2.children, el, parentComponent);
+        }
+
+        if ((oldShapeFlag & ShapeFlags.ARRAY_CHILDREN) & (newShapeFlag & ShapeFlags.ARRAY_CHILDREN)) {
+            // TODO: ArrayChildren -> ArrayChildren
+        }
+    }
+
+    function unmountChildren(children) {
+        for (let index = 0; index < children.length; index++) {
+            const child = children[index];
+            hostRemove(child.el, child);
+        }
     }
 
     function patchProps(el, oldProps, newProps) {
