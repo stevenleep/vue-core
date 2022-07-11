@@ -7,7 +7,13 @@ import { effect } from "../reactivity";
 
 const DEFAULT_EMPTY_OBJ = {};
 export function createRenderer(customRenderOptions) {
-    const { createElement: hostCreateElement, patchProp: hostPatchProp, insert: hostInsert } = customRenderOptions;
+    const {
+        createElement: hostCreateElement,
+        patchProp: hostPatchProp,
+        insert: hostInsert,
+        remove: hostRemove,
+        setElementText: hostSetElementText
+    } = customRenderOptions;
 
     function render(vnode, container, parentComponent) {
         patch(null, vnode, container, parentComponent);
@@ -49,7 +55,33 @@ export function createRenderer(customRenderOptions) {
         const newProps = n2.props || DEFAULT_EMPTY_OBJ;
 
         const el = (n2.el = n1.el);
+
+        patchChildren(n1, n2, container);
         patchProps(el, oldProps, newProps);
+    }
+
+    // 更新Children
+    function patchChildren(n1, n2, container) {
+        const oldShapeFlag = n1.shapeFlag;
+        const newShapeFlag = n2.shapeFlag;
+
+        // 由ArrayChildren -> TextChildren
+        if (newShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+            if (oldShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+                unmountChildren(n1.children);
+                hostSetElementText(container, n2.children);
+            }
+        }
+        // 由TextChildren -> ArrayChildren
+        // 由ArrayChildren -> ArrayChildren
+        // 由TextChildren -> TextChildren
+    }
+
+    function unmountChildren(children) {
+        for (let index = 0; index < children.length; index++) {
+            const child = children[index];
+            hostRemove(child.el, child);
+        }
     }
 
     function patchProps(el, oldProps, newProps) {
