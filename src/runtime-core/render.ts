@@ -60,21 +60,28 @@ export function createRenderer(customRenderOptions) {
         patchProps(el, oldProps, newProps);
     }
 
-    // 更新Children
+    // TODO（lishiwen）: 更新Children更好的做法
     function patchChildren(n1, n2, container) {
         const oldShapeFlag = n1.shapeFlag;
         const newShapeFlag = n2.shapeFlag;
 
         // 由ArrayChildren -> TextChildren
+        // 由TextChildren -> ArrayChildren
+        // 由ArrayChildren -> ArrayChildren
+        // 由TextChildren -> TextChildren
+
         if (newShapeFlag & ShapeFlags.TEXT_CHILDREN) {
             if (oldShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
                 unmountChildren(n1.children);
                 hostSetElementText(container, n2.children);
+            } else if ((oldShapeFlag & ShapeFlags.TEXT_CHILDREN) && n1.children !== n2.children) {
+                // 由TextChildren -> TextChildren, 在两次结果不相同时候更新
+                hostSetElementText(container, n2.children);
             }
         }
-        // 由TextChildren -> ArrayChildren
-        // 由ArrayChildren -> ArrayChildren
-        // 由TextChildren -> TextChildren
+
+        if (newShapeFlag & ShapeFlags.ARRAY_CHILDREN) { }
+
     }
 
     function unmountChildren(children) {
