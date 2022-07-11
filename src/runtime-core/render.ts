@@ -56,32 +56,36 @@ export function createRenderer(customRenderOptions) {
 
         const el = (n2.el = n1.el);
 
-        patchChildren(n1, n2, container);
+        patchChildren(n1, n2, el, container);
         patchProps(el, oldProps, newProps);
     }
 
     // TODO（lishiwen）: 更新Children更好的做法
-    function patchChildren(n1, n2, container) {
+    function patchChildren(n1, n2, el, parentComponent) {
         const oldShapeFlag = n1.shapeFlag;
         const newShapeFlag = n2.shapeFlag;
 
-        // 由ArrayChildren -> TextChildren
-        // 由TextChildren -> ArrayChildren
-        // 由ArrayChildren -> ArrayChildren
+        // ArrayChildren -> TextChildren
         // 由TextChildren -> TextChildren
-
         if (newShapeFlag & ShapeFlags.TEXT_CHILDREN) {
             if (oldShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
                 unmountChildren(n1.children);
-                hostSetElementText(container, n2.children);
+                hostSetElementText(el, n2.children);
             } else if ((oldShapeFlag & ShapeFlags.TEXT_CHILDREN) && n1.children !== n2.children) {
                 // 由TextChildren -> TextChildren, 在两次结果不相同时候更新
-                hostSetElementText(container, n2.children);
+                hostSetElementText(el, n2.children);
             }
         }
 
-        if (newShapeFlag & ShapeFlags.ARRAY_CHILDREN) { }
+        // TextChildren -> ArrayChildren
+        if ((oldShapeFlag & ShapeFlags.TEXT_CHILDREN) & (newShapeFlag & ShapeFlags.ARRAY_CHILDREN)) {
+            hostSetElementText(el, "");
+            mountChildren(n2.children, el, parentComponent);
+        }
 
+        if ((oldShapeFlag & ShapeFlags.ARRAY_CHILDREN) & (newShapeFlag & ShapeFlags.ARRAY_CHILDREN)) {
+            // TODO: ArrayChildren -> ArrayChildren
+        }
     }
 
     function unmountChildren(children) {
