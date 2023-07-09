@@ -14,7 +14,7 @@ I am in progress...
 > Objectives??
 
 - [x] Learn vue3 core knowledge points and project architecture design ideas
-- [ ] Design a business framework for WebPlugin plugin development
+- [x] Design a business framework for WebPlugin plugin development
 
 ## Deployment
 
